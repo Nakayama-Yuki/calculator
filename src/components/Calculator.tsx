@@ -4,16 +4,12 @@ import { useState } from "react";
 import Display from "@/components/Display";
 import KeyPad from "@/components/KeyPad";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useTheme } from "@/contexts/ThemeContext";
 
 /**
  * 計算機のメインコンポーネント
  * ディスプレイと数字キーパッドを統合し、計算ロジックを管理します
  */
 export default function Calculator() {
-  // テーマコンテキストから現在のテーマを取得
-  const { theme } = useTheme();
-
   // 計算機の現在の表示値
   const [display, setDisplay] = useState<string>("0");
   // 前の数値を保持
@@ -144,7 +140,7 @@ export default function Calculator() {
   };
 
   return (
-    <div className="bg-[var(--calculator-bg)] p-6 rounded-2xl shadow-2xl max-w-xs mx-auto transition-colors duration-300 ease-in-out">
+    <div className="bg-[var(--calculator-bg)] p-6 rounded-2xl shadow-2xl max-w-xs mx-auto transition-colors duration-300 ease-in-out dark:shadow-gray-800">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-medium">電卓</h1>
         <ThemeToggle />

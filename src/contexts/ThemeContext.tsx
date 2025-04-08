@@ -33,6 +33,21 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // テーマ状態を管理するためのステート
   const [theme, setTheme] = useState<Theme>("dark");
 
+  /**
+   * テーマを適用する関数
+   * HTMLルート要素とbody要素にテーマクラスを適用
+   */
+  const applyTheme = (selectedTheme: Theme) => {
+    // HTMLルート要素にテーマクラスを適用/削除
+    document.documentElement.classList.toggle("dark", selectedTheme === "dark");
+
+    // body要素がテーマの変更を認識できるように追加処理
+    document.body.dataset.theme = selectedTheme;
+
+    // ローカルストレージにテーマ設定を保存
+    localStorage.setItem("calculator-theme", selectedTheme);
+  };
+
   // 初期化時にローカルストレージからテーマ設定を読み込む
   useEffect(() => {
     // ブラウザのプリファレンスをチェック
@@ -47,8 +62,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
     setTheme(initialTheme);
 
-    // HTML要素にテーマクラスを適用
-    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+    // テーマを適用
+    applyTheme(initialTheme);
   }, []);
 
   /**
@@ -58,11 +73,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     setTheme((prevTheme) => {
       const newTheme = prevTheme === "dark" ? "light" : "dark";
 
-      // ローカルストレージにテーマ設定を保存
-      localStorage.setItem("calculator-theme", newTheme);
-
-      // HTML要素にテーマクラスを適用/削除
-      document.documentElement.classList.toggle("dark", newTheme === "dark");
+      // テーマを適用
+      applyTheme(newTheme);
 
       return newTheme;
     });
