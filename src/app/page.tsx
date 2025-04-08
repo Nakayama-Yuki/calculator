@@ -1,11 +1,9 @@
-"use client";
-
-import Calculator from "@/components/Calculator";
-
 /**
  * 計算機アプリのホームページ
- * 2025年4月7日作成
+ * 2025年4月8日更新
  */
+import Calculator from "@/components/Calculator";
+
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">

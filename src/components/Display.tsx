@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 /**
  * 計算機のディスプレイコンポーネント
  * 現在の計算結果や入力値を表示します
@@ -10,8 +8,7 @@ interface DisplayProps {
   value: string;
 }
 
-const Display: React.FC<DisplayProps> = ({ value }) => {
-  // 値の長さに応じてフォントサイズを調整するためのクラス
+export default function Display({ value }: DisplayProps) {
   const getFontSizeClass = () => {
     const length = value.length;
     if (length > 12) return "text-2xl";
@@ -29,6 +26,4 @@ const Display: React.FC<DisplayProps> = ({ value }) => {
       </div>
     </div>
   );
-};
-
-export default Display;
+}
