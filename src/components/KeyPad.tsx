@@ -55,7 +55,6 @@ export default function KeyPad({
   onOperator,
   onEquals,
   onClear,
-
   onPercent,
   onToggleSign,
 }: KeyPadProps) {
