@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 /**
  * 計算機のキーパッドコンポーネントのプロパティ
  */
@@ -29,12 +27,12 @@ interface CalcButtonProps {
 /**
  * 計算機のボタンコンポーネント
  */
-const CalcButton: React.FC<CalcButtonProps> = ({
+function CalcButton({
   onClick,
   className = "",
   children,
   ariaLabel,
-}) => {
+}: CalcButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -45,13 +43,13 @@ const CalcButton: React.FC<CalcButtonProps> = ({
       {children}
     </button>
   );
-};
+}
 
 /**
  * 計算機のキーパッドコンポーネント
  * 数字や演算子などのボタンを表示する
  */
-const KeyPad: React.FC<KeyPadProps> = ({
+export default function KeyPad({
   onDigit,
   onDecimal,
   onOperator,
@@ -60,7 +58,7 @@ const KeyPad: React.FC<KeyPadProps> = ({
   onAllClear,
   onPercent,
   onToggleSign,
-}) => {
+}: KeyPadProps) {
   // ボタンのスタイル定義 - CSS変数を使用
   const operatorStyle = "bg-[var(--button-operator-bg)] text-white";
   const numberStyle = "bg-[var(--button-number-bg)] text-white";
@@ -191,6 +189,4 @@ const KeyPad: React.FC<KeyPadProps> = ({
       </CalcButton>
     </div>
   );
-};
-
-export default KeyPad;
+}
