@@ -55,7 +55,7 @@ export default function KeyPad({
   onOperator,
   onEquals,
   onClear,
-  onAllClear,
+
   onPercent,
   onToggleSign,
 }: KeyPadProps) {
@@ -68,10 +68,10 @@ export default function KeyPad({
     <div className="grid grid-cols-4 gap-2">
       {/* 機能ボタン行 */}
       <CalcButton
-        onClick={onAllClear}
+        onClick={onClear}
         className={functionStyle}
-        ariaLabel="全クリア">
-        AC
+        ariaLabel="クリア">
+        C
       </CalcButton>
       <CalcButton
         onClick={onToggleSign}
