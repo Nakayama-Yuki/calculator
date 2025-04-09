@@ -18,6 +18,8 @@ export default function Calculator() {
   const [operator, setOperator] = useState<string | null>(null);
   // 演算子が選択された後かどうか
   const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
+  // 計算式全体を表示するための状態
+  const [expression, setExpression] = useState<string>("");
 
   /**
    * 数字キーが押された時の処理
@@ -53,10 +55,14 @@ export default function Calculator() {
 
     if (prevValue === null) {
       setPrevValue(display);
+      // 式の更新: 最初の数値と演算子
+      setExpression(`${display} ${nextOperator} `);
     } else if (operator) {
       const result = calculate(parseFloat(prevValue), inputValue, operator);
       setDisplay(String(result));
       setPrevValue(String(result));
+      // 式の更新: 計算結果と次の演算子
+      setExpression(`${result} ${nextOperator} `);
     }
 
     setWaitingForOperand(true);
@@ -100,6 +106,9 @@ export default function Calculator() {
     const inputValue = parseFloat(display);
     const result = calculate(parseFloat(prevValue), inputValue, operator);
 
+    // 式の更新: 完全な計算式と結果
+    setExpression(`${prevValue} ${operator} ${display} = ${result}`);
+
     setDisplay(String(result));
     setPrevValue(null);
     setOperator(null);
@@ -114,6 +123,7 @@ export default function Calculator() {
     setPrevValue(null);
     setOperator(null);
     setWaitingForOperand(false);
+    setExpression("");
   };
 
   /**
@@ -129,6 +139,12 @@ export default function Calculator() {
   const handlePercent = () => {
     const value = parseFloat(display);
     setDisplay(String(value / 100));
+    // パーセント計算を式に反映
+    if (expression && prevValue !== null) {
+      setExpression(`${expression}(${display}%) `);
+    } else {
+      setExpression(`${display}% `);
+    }
   };
 
   /**
@@ -137,6 +153,12 @@ export default function Calculator() {
   const handleToggleSign = () => {
     const value = parseFloat(display);
     setDisplay(String(value * -1));
+
+    // 符号反転を式に反映
+    if (waitingForOperand && expression) {
+      // 式の最後を更新
+      setExpression(expression.trimEnd() + " ");
+    }
   };
 
   return (
@@ -145,7 +167,7 @@ export default function Calculator() {
         <h1 className="text-lg font-medium">電卓</h1>
         <ThemeToggle />
       </div>
-      <Display value={display} />
+      <Display value={display} expression={expression} />
       <KeyPad
         onDigit={handleDigit}
         onDecimal={handleDecimal}
