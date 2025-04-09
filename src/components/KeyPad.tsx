@@ -9,7 +9,6 @@ interface KeyPadProps {
   onOperator: (operator: string) => void;
   onEquals: () => void;
   onClear: () => void;
-  onAllClear: () => void;
   onPercent: () => void;
   onToggleSign: () => void;
 }
