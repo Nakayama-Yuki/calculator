@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Display from "@/components/Display";
 import KeyPad from "@/components/KeyPad";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -8,8 +8,10 @@ import Decimal from "decimal.js";
 
 /**
  * 計算機のメインコンポーネント
- * ディスプレイと数字キーパッドを統合し、decimal.jsを使用して正確な計算ロジックを管理します
+ * ディスプレイと数字キーパッド、キーボード入力対応を統合し、decimal.jsを使用して正確な計算ロジックを管理します
+ * @returns {JSX.Element} 計算機コンポーネント
  */
+
 export default function Calculator() {
   // 計算機の現在の表示値
   const [display, setDisplay] = useState<string>("0");
@@ -21,6 +23,125 @@ export default function Calculator() {
   const [waitingForOperand, setWaitingForOperand] = useState<boolean>(false);
   // 計算式全体を表示するための状態
   const [expression, setExpression] = useState<string>("");
+  // ツールチップの表示状態
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
+  // ツールチップの参照
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * ツールチップの表示/非表示を切り替える関数
+   */
+  function toggleTooltip() {
+    setShowTooltip((prev) => !prev);
+  }
+
+  /**
+   * ツールチップ外のクリックを検出して非表示にする
+   */
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target as Node)
+      ) {
+        setShowTooltip(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  /**
+   * キーボード入力イベントをリッスンするためのエフェクト
+   * キー入力に応じて適切な電卓操作を実行します
+   */
+  useEffect(() => {
+    // キーボードイベントハンドラー
+    function handleKeyDown(event: KeyboardEvent) {
+      // イベントの伝播を防止（ページのスクロールなどを防ぐため）
+      if (
+        [
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "/",
+          "*",
+          "+",
+          "-",
+        ].includes(event.key)
+      ) {
+        event.preventDefault();
+      }
+
+      // 数字キー (0-9)
+      if (/^[0-9]$/.test(event.key)) {
+        handleDigit(event.key);
+        return;
+      }
+
+      // 演算子
+      switch (event.key) {
+        case "+":
+          handleOperator("+");
+          break;
+        case "-":
+          handleOperator("-");
+          break;
+        case "*":
+          handleOperator("×");
+          break;
+        case "/":
+          handleOperator("÷");
+          break;
+        case ".":
+        case ",":
+          handleDecimal();
+          break;
+        case "Enter":
+        case "=":
+          handleEquals();
+          break;
+        case "Escape":
+        case "c":
+        case "C":
+          handleClear();
+          break;
+        case "%":
+          handlePercent();
+          break;
+        case "Backspace":
+          handleBackspace();
+          break;
+        default:
+          break;
+      }
+    }
+
+    // キーボードイベントリスナーを追加
+    window.addEventListener("keydown", handleKeyDown);
+
+    // クリーンアップ関数
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [display, prevValue, operator, waitingForOperand]); // 依存配列に状態変数を追加
+
+  /**
+   * バックスペースキーの処理 - 入力値を一文字ずつ削除
+   */
+  function handleBackspace() {
+    if (display === "0" || display === "Error" || waitingForOperand) {
+      return;
+    }
+
+    // 最後の文字を削除
+    const newDisplay = display.length > 1 ? display.slice(0, -1) : "0";
+    setDisplay(newDisplay);
+  }
 
   /**
    * 数字キーが押された時の処理
@@ -202,7 +323,51 @@ export default function Calculator() {
     <div className="bg-[var(--calculator-bg)] p-6 rounded-2xl shadow-2xl max-w-xs mx-auto transition-colors duration-300 ease-in-out dark:shadow-gray-800">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-medium">電卓</h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          {/* キーボードショートカット情報アイコン */}
+          <div className="relative">
+            <button
+              onClick={toggleTooltip}
+              className="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              aria-label="キーボードショートカット情報">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+              </svg>
+            </button>
+
+            {/* ツールチップ */}
+            {showTooltip && (
+              <div
+                ref={tooltipRef}
+                className="absolute right-0 mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 min-w-[200px] text-xs"
+                role="tooltip">
+                <h3 className="font-medium text-sm mb-1">
+                  キーボードでも操作できます:
+                </h3>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                  <li>数字キー: 0-9</li>
+                  <li>演算子: +, -, *, /</li>
+                  <li>小数点: . または ,</li>
+                  <li>計算: Enter または =</li>
+                  <li>クリア: Esc または C</li>
+                  <li>削除: Backspace</li>
+                </ul>
+              </div>
+            )}
+          </div>
+          <ThemeToggle />
+        </div>
       </div>
       <Display value={display} expression={expression} />
       <KeyPad
