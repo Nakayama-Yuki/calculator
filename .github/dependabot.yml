@@ -4,10 +4,9 @@ updates:
   # pnpmでもpackage-ecosystemは"npm"を使用
   - package-ecosystem: "npm"
     directory: "/"
+    # 更新のスケジュール設定
     schedule:
-      # 更新のスケジュール設定
-      # 毎月更新
-      interval: "monthly"
+      interval: "monthly" #毎月更新
     open-pull-requests-limit: 10
     commit-message:
       prefix: "chore"
