@@ -11,21 +11,11 @@ updates:
       interval: "monthly"
     # 同時に開けるプルリクエストの最大数を制限
     open-pull-requests-limit: 5
-    # コミットメッセージの設定
-    commit-message:
-      # コミットメッセージのプレフィックス（chore: 保守作業）
-      prefix: "chore"
-      # スコープ情報を含める
-      include: "scope"
+
     # 更新対象の依存関係タイプ
     allow:
       # 全ての依存関係タイプを対象とする
       - dependency-type: "all"
-    # プルリクエストに自動で付与するラベル
-    labels:
-      - "dependencies"
-      - "automated"
-      - "pnpm"
 
     # 特定の更新タイプを無視する設定
     # メジャーアップデートを無効化（破壊的変更の可能性があるため）
