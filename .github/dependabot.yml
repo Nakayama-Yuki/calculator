@@ -6,16 +6,11 @@ updates:
   - package-ecosystem: "npm"
     # 監視対象のディレクトリ（プロジェクトルート）
     directory: "/"
-    # 更新チェックのスケジュール設定
     schedule:
       interval: "monthly"
+
     # 同時に開けるプルリクエストの最大数を制限
     open-pull-requests-limit: 5
-
-    # 更新対象の依存関係タイプ
-    allow:
-      # 全ての依存関係タイプを対象とする
-      - dependency-type: "all"
 
     # 特定の更新タイプを無視する設定
     # メジャーアップデートを無効化（破壊的変更の可能性があるため）
