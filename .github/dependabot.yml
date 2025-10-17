@@ -7,7 +7,7 @@ updates:
     # 監視対象のディレクトリ（プロジェクトルート）
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly" # 週次で更新をチェック
 
     # 同時に開けるプルリクエストの最大数を制限
     open-pull-requests-limit: 5
