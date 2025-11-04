@@ -44,10 +44,10 @@ export default function Display({ value, expression }: DisplayProps) {
   };
 
   return (
-    <div className="bg-[var(--display-bg)] p-4 mb-4 rounded-lg text-right overflow-hidden transition-colors duration-300 ease-in-out h-[120px]">
+    <div className="bg-(--display-bg) p-4 mb-4 rounded-lg text-right overflow-hidden transition-colors duration-300 ease-in-out h-[120px]">
       {/* 計算式の表示エリア */}
       <div
-        className={`${getExpressionFontSizeClass()} text-gray-300 font-medium mb-1 min-h-[1.5rem] break-words`}
+        className={`${getExpressionFontSizeClass()} text-gray-300 font-medium mb-1 min-h-6 wrap-break-word`}
         aria-live="polite"
         role="status">
         {expression}
@@ -55,7 +55,7 @@ export default function Display({ value, expression }: DisplayProps) {
 
       {/* 現在値の表示エリア - 固定高さを追加して安定させる */}
       <div
-        className={`${getFontSizeClass()} text-white font-semibold min-h-[3rem] flex items-end justify-end`}
+        className={`${getFontSizeClass()} text-white font-semibold min-h-12 flex items-end justify-end`}
         aria-live="polite"
         role="status">
         {value}

@@ -290,7 +290,7 @@ export default function Calculator() {
   }
 
   return (
-    <div className="bg-[var(--calculator-bg)] p-6 rounded-2xl shadow-2xl max-w-xs mx-auto transition-colors duration-300 ease-in-out dark:shadow-gray-800">
+    <div className="bg-(--calculator-bg) p-6 rounded-2xl shadow-2xl max-w-xs mx-auto transition-colors duration-300 ease-in-out dark:shadow-gray-800">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-medium">電卓</h1>
         <div className="flex items-center gap-2">
