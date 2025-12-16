@@ -44,7 +44,7 @@ export default function Display({ value, expression }: DisplayProps) {
   };
 
   return (
-    <div className="bg-(--display-bg) p-4 mb-4 rounded-lg text-right overflow-hidden transition-colors duration-300 ease-in-out h-[120px]">
+    <div className="bg-(--display-bg) p-4 mb-4 rounded-lg text-right overflow-hidden transition-colors duration-300 ease-in-out h-30">
       {/* 計算式の表示エリア */}
       <div
         className={`${getExpressionFontSizeClass()} text-gray-300 font-medium mb-1 min-h-6 wrap-break-word`}

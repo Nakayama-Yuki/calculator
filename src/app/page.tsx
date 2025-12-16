@@ -1,7 +1,3 @@
-/**
- * 計算機アプリのホームページ
- * 2025年4月8日更新
- */
 import Calculator from "@/components/Calculator";
 
 export default function Home() {
