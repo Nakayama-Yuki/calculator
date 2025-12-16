@@ -17,7 +17,14 @@ export default function KeyboardShortcutInfo() {
     setShowTooltip((prev) => !prev);
   }
 
-  // ツールチップ外のクリックを検出して非表示にする
+  /**
+   * ツールチップ外のクリックを検出して非表示にする
+   *
+   * 注: 依存配列が空 [] なのは意図的です。このエフェクトはコンポーネントのマウント時に一度だけ
+   * イベントリスナーを登録し、アンマウント時にクリーンアップします。
+   * handleClickOutside関数内でsetShowTooltipを呼び出していますが、
+   * これは外部システム（documentのmousedownイベント）との同期のための正しいパターンです。
+   */
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
