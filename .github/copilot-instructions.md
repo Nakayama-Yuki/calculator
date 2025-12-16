@@ -2,101 +2,172 @@
 
 ## プロジェクト概要
 
-Next.js 15、React 19、TypeScript で構築されたモダンなウェブ電卓です。decimal.js を使用して IEEE754 浮動小数点誤差を解消した高精度計算を特徴とし、Tailwind CSS v4 によるダーク/ライトテーマ対応と包括的なキーボードアクセシビリティを備えています。
+Next.js 16、React 19、TypeScript で構築されたモダンなウェブ電卓です。decimal.js を使用して IEEE754 浮動小数点誤差を解消した**高精度計算**が最大の特徴。Tailwind CSS v4 による responsive UI と、キーボードショートカット対応のアクセシビリティを備えています。
 
-## アーキテクチャと主要コンポーネント
+## コアアーキテクチャ
 
-### コアアーキテクチャパターン
+### 単一の状態管理スキーム（Calculator.tsx）
 
-- **単一状態コンテナ**: `Calculator.tsx`が全ての計算状態（display, prevValue, operator, expression）を管理
-- **コンポーネント構成**: Display + KeyPad + ThemeToggle コンポーネントの明確なプロップインターフェース
-- **コンテキストベースのテーマ**: `ThemeContext`が localStorage 永続化付きグローバルテーマ状態を提供
+[Calculator.tsx](src/components/Calculator.tsx) が全計算機の状態を一元管理：
 
-### 重要なコンポーネント
+- `display`: 現在表示中の値または計算結果
+- `prevValue`: 演算子押下時の値
+- `operator`: 選択中の演算子（+, -, ×, ÷）
+- `expression`: 式全体（Display用）
+- `waitingForOperand`: 演算子直後の入力判定フラグ
 
-- `Calculator.tsx` - decimal.js 計算ロジック付きメイン状態管理
-- `Display.tsx` - コンテンツ長に基づく動的フォントサイジング
-- `KeyPad.tsx` - 一貫したスタイリングのグリッドベースボタンレイアウト
-- `ThemeContext.tsx` - システム設定検出付きテーマ状態
+### コンポーネント責務
 
-## 必須開発パターン
+| ファイル                                                            | 役割                                      | 依存関係                              |
+| ------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------- |
+| [Calculator.tsx](src/components/Calculator.tsx)                     | 状態管理、計算ロジック、キーボード処理    | Display, KeyPad, KeyboardShortcutInfo |
+| [Display.tsx](src/components/Display.tsx)                           | 結果と履歴式の表示（動的フォントサイズ）  | -                                     |
+| [KeyPad.tsx](src/components/KeyPad.tsx)                             | UI ボタングリッド、クリックハンドラー提供 | CalcButton 内部コンポーネント         |
+| [KeyboardShortcutInfo.tsx](src/components/KeyboardShortcutInfo.tsx) | キーボードショートカットツールチップ      | -                                     |
 
-### 計算ロジック（decimal.js）
+## 必須実装パターン
+
+### Decimal.js による計算（全ての算術演算で必須）
 
 ```typescript
-// 浮動小数点誤差を避けるため、計算には必ずDecimalを使用
-const result = new Decimal(firstValue).plus(new Decimal(secondValue));
-return result.toFixed(
-  result.decimalPlaces() > 10 ? 10 : result.decimalPlaces()
-);
+// 浮動小数点誤差を回避。常に Decimal インスタンスを使用
+function calculate(
+  firstValue: string,
+  secondValue: string,
+  operator: string,
+): string {
+  try {
+    const first = new Decimal(firstValue);
+    const second = new Decimal(secondValue);
+    let result: Decimal;
+
+    switch (operator) {
+      case "+":
+        result = first.plus(second);
+        break;
+      case "-":
+        result = first.minus(second);
+        break;
+      case "×":
+        result = first.times(second);
+        break;
+      case "÷":
+        if (second.isZero()) return "Error";
+        result = first.dividedBy(second);
+        break;
+      default:
+        return secondValue;
+    }
+
+    // 精度制限：10 小数点以下に制限
+    return result.toFixed(
+      result.decimalPlaces() > 10 ? 10 : result.decimalPlaces(),
+    );
+  } catch (error) {
+    console.error("計算エラー:", error);
+    return "Error";
+  }
+}
 ```
 
-### テーマ用 CSS 変数
+### キーボードイベント処理（useEffect + preventDefault）
+
+[Calculator.tsx #225-293](src/components/Calculator.tsx#L225-L293) の `useEffect` でグローバルキーボードリッスン：
+
+- 数字キー (0-9)：`handleDigit()`
+- 演算子：`+`, `-`, `*`(→×), `/`(→÷)
+- Enter/=：`handleEquals()`
+- Escape/C：`handleClear()`
+- Backspace：`handleBackspace()`
+- **重要**：ArrowUp/Down/Left/Right, /, \*, +, - で `preventDefault()` 実行
+
+### CSS 変数カスタムプロパティ（Tailwind v4 との統合）
+
+[globals.css](src/app/globals.css) で定義：
 
 ```css
 :root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --calculator-bg: #f3f4f6;
   --button-number-bg: #4b5563;
+  --button-function-bg: #6b7280;
   --button-operator-bg: #f59e0b;
   --display-bg: #1f2937;
 }
-.dark {
-  /* ダークモードのオーバーライド */
-}
 ```
 
-### コンポーネントプロップパターン
+Tailwind で参照：`bg-(--display-bg)` フォーマット使用
 
-全てのコンポーネントが明確なプロップ定義付きの明示的 TypeScript インターフェースを使用（例：`DisplayProps`, `KeyPadProps`）
+### 動的フォントサイズ（Display コンポーネント）
+
+[Display.tsx](src/components/Display.tsx) で `getFontSizeClass()` 実装：
+
+- 値の長さ > 12 文字：text-2xl
+- 値の長さ > 8 文字：text-3xl
+- デフォルト：text-4xl
+
+式も同様に `getExpressionFontSizeClass()` で調整
+
+### プロップ定義の明示的 TypeScript インターフェース
+
+全コンポーネント先頭で定義（例）：
+
+```typescript
+interface DisplayProps {
+  value: string;
+  expression: string;
+}
+```
 
 ## 開発ワークフロー
 
 ### コマンド
 
-- `pnpm dev --turbopack` - Turbopack 付き開発サーバー
-- `pnpm build` - プロダクションビルド
-- `pnpm lint` - Next.js 設定付き ESLint
+```bash
+pnpm dev              # 開発サーバー（http://localhost:3000）
+pnpm build            # プロダクションビルド
+pnpm lint             # ESLint
+pnpm test             # Playwright テスト（未実装、tests/ に例あり）
+```
 
 ### パッケージ管理
 
-- **pnpm**を使用（npm/yarn ではない）
-- 主要依存関係: 計算用 decimal.js、Tailwind CSS v4
+- **pnpm**
+- 主要依存関係：[decimal.js ^10.6.0](package.json)、Tailwind CSS v4.1、React 19
 
-## 主要実装詳細
+### TypeScript 設定
 
-### 状態管理
+[tsconfig.json](tsconfig.json)：
 
-- 電卓状態は`Calculator.tsx`で複数の useState フックを使用して集約管理
-- 計算履歴表示のための式追跡
-- 適切な演算子チェーンのための`waitingForOperand`フラグ
+- target: ES2024
+- strict: true（有効）
+- paths: `@/*` → `./src/*`
 
-### キーボードサポート
+## 重要な注意点
 
-- 矢印キーの preventDefault を含む`useEffect`での完全なキーボードイベント処理
-- キーボード入力を電卓機能にマッピング（数字、演算子、Enter、Escape）
+### 2. テスト
 
-### スタイリングアプローチ
+- [tests/example.spec.ts](tests/example.spec.ts) はプレイスホルダー（playwright.dev 対象）
+- 電卓アプリのテストは未実装：要 Playwright または Jest で新規作成
 
-- テーマ変数の CSS カスタムプロパティ
-- CSS 変数フォールバック付き Tailwind ユーティリティクラス
-- コンテンツ長に基づく動的フォントサイジング
-- ボタン配置のグリッドレイアウト
+### 3. エラーハンドリング
 
-### エラーハンドリング
+- ゼロ除算 → "Error" 表示
+- 無効な Decimal 入力 → "Error" 表示
+- キーボード入力の無効キーは無視（switch default）
 
-- 全ての decimal.js 操作の try-catch ブロック
-- ゼロ除算の検出
-- 無効な計算の"Error"表示状態
+## クイックリファレンス
 
-## ファイル構造コンテキスト
+**新機能追加フロー：**
 
-- `src/app/` - Next.js App Router ページとレイアウト
-- `src/components/` - 再利用可能 UI コンポーネント
-- `src/contexts/` - React Context プロバイダー
-- `globals.css`の CSS カスタムプロパティでのテーマ設定
+1. Calculator.tsx に状態・ハンドラーを追加
+2. KeyPad または KeyboardShortcutInfo で UI/キー割り当てを追加
+3. Display に新情報が必要なら更新
+4. globals.css に CSS 変数が必要なら追加
 
-## テストと開発ノート
+**バグ修正フロー：**
 
-- 全ての数値演算で decimal.js を必須使用
-- テーマ変更は localStorage に永続化必須
-- 全機能でキーボードアクセシビリティが必須
-- ボタン状態には hover、active、focus スタイルを含む
+1. 計算誤差 → calculate() 関数の Decimal 操作確認
+2. キーボード未反応 → useEffect の keydown ハンドラー確認
+3. 表示崩れ → Display の getFontSizeClass() またはボタンの Tailwind クラス確認
