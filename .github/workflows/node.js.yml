@@ -5,6 +5,8 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  #手動でワークフローを実行するためのトリガー
+  workflow_dispatch:
 
 # セキュリティのため、必要最小限の権限のみを付与
 permissions:
