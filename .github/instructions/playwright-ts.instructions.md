@@ -1,6 +1,6 @@
 ---
 description: "Playwright test generation instructions"
-applyTo: "**"
+applyTo: "tests/**/*.spec.ts,playwright.config.ts"
 ---
 
 ## Test Writing Guidelines
