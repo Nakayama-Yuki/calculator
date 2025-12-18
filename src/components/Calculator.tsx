@@ -129,6 +129,9 @@ export default function Calculator() {
         setPrevValue(display);
         // 式の更新: 最初の数値と演算子
         setExpression(`${display} ${nextOperator} `);
+      } else if (waitingForOperand) {
+        // 演算子を上書き（連続して演算子が押された場合）
+        setExpression(`${prevValue} ${nextOperator} `);
       } else if (operator) {
         // decimal.jsを使用して計算
         const result = calculate(prevValue, inputValue, operator);
@@ -141,7 +144,7 @@ export default function Calculator() {
       setWaitingForOperand(true);
       setOperator(nextOperator);
     },
-    [display, prevValue, operator],
+    [display, prevValue, operator, waitingForOperand],
   );
 
   /**
