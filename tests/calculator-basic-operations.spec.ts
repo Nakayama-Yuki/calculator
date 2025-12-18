@@ -125,9 +125,28 @@ test.describe("基本的な四則演算", () => {
 
     test("除算: 20 ÷ 4 = 5 (/キーが÷にマッピング)", async ({ page }) => {
       await test.step("キーボードで入力", async () => {
+        // ページにフォーカスを確実に当てる
+        await page.locator("body").click();
+
         await page.keyboard.press("2");
         await page.keyboard.press("0");
+
+        // デバッグ: "/" キー入力前の状態を確認
+        const beforeSlash = await page
+          .locator('[role="status"]')
+          .nth(1)
+          .textContent();
+        console.log("Before /:", beforeSlash);
+
         await page.keyboard.press("/"); // ÷ にマッピング
+
+        // デバッグ: "/" キー入力後の状態を確認
+        const afterSlash = await page
+          .locator('[role="status"]')
+          .nth(1)
+          .textContent();
+        console.log("After /:", afterSlash);
+
         await page.keyboard.press("4");
         await page.keyboard.press("Enter");
       });
