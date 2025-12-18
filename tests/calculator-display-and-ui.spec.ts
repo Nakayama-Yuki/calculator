@@ -232,8 +232,10 @@ test.describe("表示とUIの動作", () => {
     });
 
     test("ディスプレイにaria-live=politeが設定されている", async ({ page }) => {
-      const display = page.locator('[aria-live="polite"]');
-      await expect(display).toBeVisible();
+      const displays = page.locator('[aria-live="polite"]');
+      await expect(displays).toHaveCount(2); // 式表示と値表示の2つ
+      await expect(displays.first()).toBeVisible();
+      await expect(displays.last()).toBeVisible();
     });
   });
 
@@ -285,16 +287,38 @@ test.describe("表示とUIの動作", () => {
       });
     });
 
-    test("長い式（26文字以上）でtext-xsクラスが適用される", async ({
+    test("中程度の式（21-25文字）でtext-smクラスが適用される", async ({
       page,
     }) => {
-      await test.step("長い式を作成", async () => {
-        // 999999 + 999999 = 1999998 (26文字)
-        for (let i = 0; i < 6; i++) {
+      await test.step("中程度の式を作成", async () => {
+        // 99999 + 999999 で式を作成（21文字）
+        for (let i = 0; i < 5; i++) {
           await page.keyboard.press("9");
         }
         await page.keyboard.press("+");
         for (let i = 0; i < 6; i++) {
+          await page.keyboard.press("9");
+        }
+        await page.keyboard.press("Enter");
+      });
+
+      await test.step("text-smクラスを確認", async () => {
+        const expression = page.locator('[role="status"]').first();
+        await expect(expression).toHaveClass(/text-sm/);
+      });
+    });
+
+    test("長い式（26文字以上）でtext-xsクラスが適用される", async ({
+      page,
+    }) => {
+      await test.step("長い式を作成", async () => {
+        // 9999999999 + 9999999999 で26文字以上の式を作成
+        // "9999999999 + 9999999999 = 19999999998" = 34文字
+        for (let i = 0; i < 10; i++) {
+          await page.keyboard.press("9");
+        }
+        await page.keyboard.press("+");
+        for (let i = 0; i < 10; i++) {
           await page.keyboard.press("9");
         }
         await page.keyboard.press("Enter");
