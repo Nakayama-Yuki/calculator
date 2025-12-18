@@ -55,7 +55,7 @@ export default defineConfig({
     //   name: "Mobile Chrome",
     //   use: { ...devices["Pixel 6"] },
     // },
-    
+
     // {
     //   name: "Mobile Safari",
     //   use: { ...devices["iPhone 12"] },
@@ -73,9 +73,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: "pnpm dev",
-  //   url: "http://localhost:3000",
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: "pnpm start",
+    url: "http://localhost:3000",
+    reuseExistingServer: !process.env.CI,
+  },
 });
