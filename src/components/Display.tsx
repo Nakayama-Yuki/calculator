@@ -21,17 +21,72 @@ interface DisplayProps {
 export default function Display({ value, expression }: DisplayProps) {
   const [copied, setCopied] = useState(false);
 
+  const copyWithExecCommand = (text: string) => {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      const success = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return success;
+    } catch {
+      return false;
+    }
+  };
+
+  const canUseClipboardApi = () => {
+    if (typeof window === "undefined") return false;
+    if (!window.isSecureContext) return false;
+    if (!navigator.clipboard?.writeText) return false;
+
+    const policy = (
+      document as Document & {
+        permissionsPolicy?: { allowsFeature?: (feature: string) => boolean };
+      }
+    ).permissionsPolicy;
+    const policyAllows = policy?.allowsFeature?.("clipboard-write");
+
+    return policyAllows !== false;
+  };
+
   /**
    * クリップボードに現在の値をコピーする
    */
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      // 2秒後にコピー状態をリセット
-      setTimeout(() => setCopied(false), 2000);
+      if (canUseClipboardApi()) {
+        await navigator.clipboard.writeText(value);
+        setCopied(true);
+        // 2秒後にコピー状態をリセット
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      const fallbackSuccess = copyWithExecCommand(value);
+      if (fallbackSuccess) {
+        setCopied(true);
+        // 2秒後にコピー状態をリセット
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      console.warn("クリップボードへのコピーがブロックされました。");
     } catch (error) {
-      console.error("クリップボードへのコピーに失敗しました:", error);
+      const fallbackSuccess = copyWithExecCommand(value);
+      if (fallbackSuccess) {
+        setCopied(true);
+        // 2秒後にコピー状態をリセット
+        setTimeout(() => setCopied(false), 2000);
+        return;
+      }
+
+      console.warn("クリップボードへのコピーに失敗しました:", error);
     }
   };
   /**
