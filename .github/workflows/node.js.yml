@@ -42,7 +42,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # ステップ4.5: Playwright用ブラウザをインストール
+      # ステップ4.5: ESLintを実行
+      - name: Run lint
+        run: pnpm lint --max-warnings=0
+
+      # ステップ4.6: Playwright用ブラウザをインストール
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
 
