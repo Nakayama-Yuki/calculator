@@ -2,6 +2,12 @@
 # 依存関係の自動更新を管理するGitHubの機能
 version: 2
 updates:
+  # GitHub Actions versions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
   # パッケージの更新設定(pnpmでもnpmを使用する)
   - package-ecosystem: "npm"
     # 監視対象のディレクトリ（プロジェクトルート）
