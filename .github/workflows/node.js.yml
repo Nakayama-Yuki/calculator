@@ -8,6 +8,11 @@ on:
   #手動でワークフローを実行するためのトリガー
   workflow_dispatch:
 
+# 同じブランチで新しいCIが開始された場合、古いCIをキャンセル
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # セキュリティのため、必要最小限の権限のみを付与
 permissions:
   contents: read
@@ -31,15 +36,11 @@ jobs:
           runtime: node@lts
           cache: true
 
-      # ステップ5: ESLintを実行
+      # ステップ3: ESLintを実行
       - name: Run lint
         run: pnpm lint --max-warnings=0
 
-      # ステップ6: Playwright用ブラウザをインストール
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
-
-      # ステップ7: Next.jsビルドキャッシュを復元
+      # ステップ4: Next.jsビルドキャッシュを復元
       - name: Cache Next.js build
         uses: actions/cache@v6
         with:
@@ -51,15 +52,19 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
             ${{ runner.os }}-nextjs-
 
-      # ステップ8: プロジェクトをビルド
+      # ステップ5: プロジェクトをビルド
       - name: Build project
         run: pnpm run build
 
-      # ステップ9: Playwrightのテストを実行
+      # ステップ6: Playwright用のChromiumをインストール
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # ステップ7: Playwrightのテストを実行
       - name: Run Playwright tests
         run: pnpm exec playwright test
 
-      # ステップ10: 成果物をアップロードする
+      # ステップ8: 成果物をアップロードする
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
