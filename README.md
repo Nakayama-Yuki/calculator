@@ -22,12 +22,14 @@
 
 ## 始め方
 
+Node.js LTS と pnpm を用意してください。依存バージョンは [package.json](package.json) を参照してください。
+
 ### インストール手順
 
 1. リポジトリをクローン：
 
 ```bash
-git clone https://github.com/yourusername/calculator.git
+git clone https://github.com/Nakayama-Yuki/calculator.git
 cd calculator
 ```
 
@@ -59,3 +61,20 @@ src/
       ├── KeyPad.tsx          # 電卓のボタン配置
       └── KeyboardShortcutInfo.tsx # キーボードショートカットツールチップ
 ```
+
+## ビルド・検証
+
+```bash
+pnpm lint
+pnpm exec playwright install --with-deps chromium
+pnpm build
+pnpm test
+```
+
+Playwright は `pnpm start` で本番サーバーを起動するため、事前ビルドが必要です。`tests/calculator-*.spec.ts` で基本演算・境界値・表示を検証します。UI モードは `pnpm test:ui`、ブラウザ表示は `pnpm test:headed`、デバッグは `pnpm test:debug` です。
+
+本番サーバーはビルド後に `pnpm start` で起動します。
+
+## 開発ルール
+
+開発時の指示は [AGENTS.md](AGENTS.md) を参照してください。依存バージョンと実行可能なスクリプトは [package.json](package.json) を正とします。
