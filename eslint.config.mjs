@@ -27,6 +27,7 @@ const eslintConfig = defineConfig([
     extends: [tseslint.configs.recommended],
   },
   globalIgnores([
+    "playwright-security-report/**",
     ".next/**",
     "out/**",
     "build/**",
