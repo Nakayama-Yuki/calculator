@@ -98,4 +98,4 @@ pnpm build
 pnpm test:e2e
 ```
 
-ブラウザ未導入の場合は `pnpm exec playwright install --with-deps chromium` を実行してください。ワークフローは [共通CI生成スクリプト](tools/web-ci/README.md) から生成します。
+ブラウザ未導入の場合は `pnpm exec playwright install --with-deps chromium` を実行してください。ワークフローは [.github/workflows/](.github/workflows/) のYAMLを直接編集します。保守手順は [CIの保守手順](tools/web-ci/README.md) を参照してください。
